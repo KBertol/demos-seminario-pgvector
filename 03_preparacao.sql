@@ -19,6 +19,7 @@ SELECT vetor_aleatorio(128) FROM generate_series(1, 100000);
 CREATE TABLE teste_ivf AS SELECT * FROM teste_indices;
 CREATE TABLE teste_hnsw AS SELECT * FROM teste_indices;
 
+\timing on
 -- IVFFlat: lists = linhas/1000 = 100 (criar DEPOIS de ter os dados)
 CREATE INDEX idx_ivf ON teste_ivf USING ivfflat (embedding vector_l2_ops) WITH (lists = 100);
 

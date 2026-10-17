@@ -6,6 +6,10 @@ CREATE OR REPLACE FUNCTION vetor_aleatorio(n int) RETURNS vector AS $$
     SELECT array_agg(random())::vector FROM generate_series(1, n);
 $$ LANGUAGE sql;
 
+DROP TABLE IF EXISTS teste_indices CASCADE;
+DROP TABLE IF EXISTS teste_ivf CASCADE;
+DROP TABLE IF EXISTS teste_hnsw CASCADE;
+
 -- Tabela base: 100 mil vetores de 128 dimensoes (sem indice = busca exata)
 CREATE TABLE teste_indices (id bigserial PRIMARY KEY, embedding vector(128));
 INSERT INTO teste_indices (embedding)

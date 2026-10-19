@@ -28,7 +28,7 @@ ALTER TABLE teste_ivf  ADD PRIMARY KEY (id);
 ALTER TABLE teste_hnsw ADD PRIMARY KEY (id);
 
 \timing on
--- IVFFlat: lists = linhas/1000 = 100 (criar DEPOIS de ter os dados)
+-- IVFFlat: lists = linhas/1000 = 100 
 CREATE INDEX idx_ivf ON teste_ivf USING ivfflat (embedding vector_l2_ops) WITH (lists = 100);
 
 -- HNSW: parametros padrao (m=16, ef_construction=64)

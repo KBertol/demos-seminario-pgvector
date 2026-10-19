@@ -22,7 +22,7 @@ EXPLAIN (ANALYZE, BUFFERS)
 SELECT id FROM teste_hnsw 
 ORDER BY embedding <-> (SELECT embedding FROM teste_hnsw WHERE id=500) LIMIT 10;
 
--- 5. Medição de Recall (HNSW)
+-- 5. Medição de Recall (IVFFlat e HNSW)
 -- 5a. Vizinhos EXATOS: desligamos o indice e buscamos de novo
 SET enable_indexscan = off;
 DROP TABLE IF EXISTS exato;
@@ -38,6 +38,13 @@ CREATE TEMP TABLE aprox AS
 SELECT id FROM teste_ivf WHERE id <> 500
 ORDER BY embedding <-> (SELECT embedding FROM teste_ivf WHERE id = 500) LIMIT 10;
 SELECT 'IVFFlat (probes = 1)' AS configuracao, count(*) AS acertos_de_10 FROM exato JOIN aprox USING (id);
+
+SET ivfflat.probes = 10;
+DROP TABLE IF EXISTS aprox;
+CREATE TEMP TABLE aprox AS
+SELECT id FROM teste_ivf WHERE id <> 500
+ORDER BY embedding <-> (SELECT embedding FROM teste_ivf WHERE id = 500) LIMIT 10;
+SELECT 'IVFFlat (probes = 10)' AS configuracao, count(*) AS acertos_de_10 FROM exato JOIN aprox USING (id);
 
 SET ivfflat.probes = 100;
 DROP TABLE IF EXISTS aprox;
@@ -59,5 +66,3 @@ CREATE TEMP TABLE aprox AS
 SELECT id FROM teste_hnsw WHERE id <> 500
 ORDER BY embedding <-> (SELECT embedding FROM teste_hnsw WHERE id = 500) LIMIT 10;
 SELECT 'HNSW (ef_search = 400)' AS configuracao, count(*) AS acertos_de_10 FROM exato JOIN aprox USING (id);
-
-

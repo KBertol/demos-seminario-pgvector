@@ -1,6 +1,5 @@
 from sentence_transformers import SentenceTransformer
 
-# 384 dimensoes
 model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
 
 docs = [

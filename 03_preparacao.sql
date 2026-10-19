@@ -2,9 +2,12 @@ SET maintenance_work_mem = '512MB';
 
 -- Funcao auxiliar: devolve UM vetor aleatorio com n numeros entre 0 e 1.
 -- (random() e chamado de novo a cada execucao da funcao, entao cada linha fica diferente)
-CREATE OR REPLACE FUNCTION vetor_aleatorio(n int) RETURNS vector AS $$
+CREATE OR REPLACE FUNCTION vetor_aleatorio(n int) 
+RETURNS vector AS 
+$$
     SELECT array_agg(random())::vector FROM generate_series(1, n);
-$$ LANGUAGE sql;
+$$ 
+LANGUAGE sql;
 
 DROP TABLE IF EXISTS teste_indices CASCADE;
 DROP TABLE IF EXISTS teste_ivf CASCADE;
@@ -19,6 +22,11 @@ SELECT vetor_aleatorio(128) FROM generate_series(1, 100000);
 CREATE TABLE teste_ivf AS SELECT * FROM teste_indices;
 CREATE TABLE teste_hnsw AS SELECT * FROM teste_indices;
 
+-- Chave primaria nas copias (CREATE TABLE AS nao copia a PK). Sem ela, buscar o vetor
+-- da consulta (WHERE id = 500) vira Seq Scan e distorce o tempo dos indices.
+ALTER TABLE teste_ivf  ADD PRIMARY KEY (id);
+ALTER TABLE teste_hnsw ADD PRIMARY KEY (id);
+
 \timing on
 -- IVFFlat: lists = linhas/1000 = 100 (criar DEPOIS de ter os dados)
 CREATE INDEX idx_ivf ON teste_ivf USING ivfflat (embedding vector_l2_ops) WITH (lists = 100);
@@ -31,5 +39,5 @@ ANALYZE teste_indices;
 ANALYZE teste_ivf;
 ANALYZE teste_hnsw;
 
--- Conferencia: deve mostrar 100000 linhas e ~100000 vetores distintos
+-- Conferencia: 100000 linhas e ~100000 vetores distintos
 SELECT count(*) AS linhas, count(DISTINCT embedding::text) AS vetores_distintos FROM teste_indices;
